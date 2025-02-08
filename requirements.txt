@@ -1,0 +1,6 @@
+numpy
+pandas
+matplotlib
+ultralytics
+opencv-python
+faster-whisper
