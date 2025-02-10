@@ -3,7 +3,6 @@ from ultralytics import YOLO
 import cv2
 import nltk
 
-
 def find_key_by_value(dictionary: dict, known_value):
     for key, value in dictionary.items():
         if value == known_value:
