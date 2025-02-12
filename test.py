@@ -12,7 +12,7 @@ def find_key_by_value(dictionary: dict, known_value):
 # Load Faster Whisper model
 whisper = WhisperModel(model_size_or_path='base', compute_type='float32')
 
-yolo = YOLO('yolo11n.pt')
+yolo = YOLO('yolov8n.pt')
 
 names = yolo.names
 
