@@ -13,6 +13,8 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
     var objectDetectionLayer = CALayer() // Layer for drawing bounding boxes
     
     var requests = [VNRequest]() // List of Vision requests from YOLO model
+    
+    var recognizedObjects: [String] = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -20,6 +22,17 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
         // Initialize camera & load YOLO model
         setCamera()
         setVision()
+        
+        // Listener for the startRecording() function
+        NotificationCenter.default.addObserver(self, selector: #selector(updateRecognizedObjects(_:)), name: Notification.Name("RecognizedSpeech"), object: nil)
+    }
+    
+    @objc func updateRecognizedObjects(_ notification: Notification) {
+        
+        if let transcribedAudio = notification.object as? String {
+            recognizedObjects = transcribedAudio.split(separator: " ").map { $0.lowercased()}
+            print("User wants to see: \(recognizedObjects)")
+        }
     }
 
     func setCamera() {
@@ -113,14 +126,13 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
                 // Debugging print statement
                 print("Detected: \(result.labels.first?.identifier ?? "Unkown Object") with confidence \(result.confidence)")
                 
-                // YOLO returns normalized coordinates (0-1)
-                let boundingBox = result.boundingBox
+                let foundLabel = result.labels.first?.identifier.lowercased() ?? "Unknown Object"
                 
-                // Converts YOLO coordinates to screen coordinates
-                let transformedBox = self.transformBoundingBox(boundingBox)
-                
-                // Displays bounding box on screen
-                self.drawBoundingBox(frame: transformedBox, label: result.labels.first?.identifier ?? "Unknown")
+                if self.recognizedObjects.contains(foundLabel) {
+                    
+                    let transformedBox = self.transformBoundingBox(result.boundingBox)
+                    self.drawBoundingBox(frame: transformedBox, label: foundLabel)
+                }
             }
         }
     }
