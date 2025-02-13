@@ -14,7 +14,11 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
     
     var requests = [VNRequest]() // List of Vision requests from YOLO model
     
-    var recognizedObjects: [String] = []
+    var recognizedObjects: [String] = [] // List of objects from audio transcription
+    
+    // Tracks camera position
+    private var cameraPosition: AVCaptureDevice.Position = .back
+    
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -25,7 +29,12 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
         
         // Listener for the startRecording() function
         NotificationCenter.default.addObserver(self, selector: #selector(updateRecognizedObjects(_:)), name: Notification.Name("RecognizedSpeech"), object: nil)
+        
+        // Listener for camera toggle
+        NotificationCenter.default.addObserver(self, selector: #selector(cameraToggle(_:)), name: Notification.Name("switchCamera"), object: nil)
+        
     }
+    
     
     @objc func updateRecognizedObjects(_ notification: Notification) {
         
@@ -34,13 +43,33 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
             print("User wants to see: \(recognizedObjects)")
         }
     }
+    
+    // Switches between front/back camera
+    @objc func cameraToggle(_ notification: Notification) {
+        
+        if let isBackCamera = notification.object as? Bool {
+            
+            if isBackCamera {
+                cameraPosition = .back
+            }
+            else {
+                cameraPosition = .front
+            }
+        }
+        
+        setCamera() // Resets camera feed
+    }
 
     func setCamera() {
         
-        captureSession.sessionPreset = .high // High camera quality
+        // Resets capture session
+        captureSession.stopRunning()
+        captureSession = AVCaptureSession()
         
-        // iPhone camera
-        guard let camera = AVCaptureDevice.default(for: .video) else { return }
+        captureSession.sessionPreset = .high // High camera quality
+                
+        // iPhone camera (front or back)
+        guard let camera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: cameraPosition) else { return }
         
         do {
             let input = try AVCaptureDeviceInput(device: camera)
@@ -126,12 +155,33 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
                 // Debugging print statement
                 print("Detected: \(result.labels.first?.identifier ?? "Unkown Object") with confidence \(result.confidence)")
                 
+                // Gets detected object label
                 let foundLabel = result.labels.first?.identifier.lowercased() ?? "Unknown Object"
                 
+                // Checks if label is in audio transcription
                 if self.recognizedObjects.contains(foundLabel) {
                     
-                    let transformedBox = self.transformBoundingBox(result.boundingBox)
-                    self.drawBoundingBox(frame: transformedBox, label: foundLabel)
+                    // Gets device screen dimensions
+                    let screenRect: CGRect = UIScreen.main.bounds
+                    let screenWidth = screenRect.size.width
+                    let screenHeight = screenRect.size.height
+                    
+                    // Stores bounds for normalized coordinates
+                    let normalizedBounds = VNImageRectForNormalizedRect(result.boundingBox, Int(screenWidth), Int(screenHeight))
+                    
+                    // Converts normalized bounds to screen coordinates
+                    let x = normalizedBounds.minX
+                    let y = screenHeight - normalizedBounds.maxY
+                    let width = normalizedBounds.maxX - normalizedBounds.minX
+                    let height = normalizedBounds.maxY - normalizedBounds.minY
+                    
+                    // Stores obect bounds as a CGRect instance
+                    let objectBounds = CGRect(x: x, y: y, width: width, height: height)
+                    
+                    // let transformedBox = self.transformBoundingBox(objectBounds)
+                    
+                    // Displays bounding box on screen
+                    self.drawBoundingBox(frame: objectBounds, label: foundLabel)
                 }
             }
         }
@@ -174,7 +224,9 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        
         NotificationCenter.default.addObserver(self, selector: #selector(toggleBoundingBoxes(_:)), name: Notification.Name("ToggleBoundingBoxes"), object: nil)
+        
     }
 
     // Shows/Hides the bounding boxes on screen
