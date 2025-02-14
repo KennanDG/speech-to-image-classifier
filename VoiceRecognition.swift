@@ -95,6 +95,10 @@ class VoiceRecognition: ObservableObject {
         audioEngine.inputNode.removeTap(onBus: 0)
         recognitionTask?.cancel()
         recognitionTask = nil
+        recognizedText = nil
+        
+        // Sends notification to CameraViewController
+        NotificationCenter.default.post(name: Notification.Name("RecognizedSpeech"), object: self.recognizedText)
     }
     
     
