@@ -110,7 +110,6 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
 
         let dataOutput = AVCaptureVideoDataOutput()
         dataOutput.setSampleBufferDelegate(self, queue: DispatchQueue(label: "videoQueue"))
-        
         captureSession.addOutput(dataOutput)
         
         captureSession.startRunning()
@@ -126,14 +125,16 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
     func setVision() {
         
         // Loads medium sized YOLO11 model in CoreML format
-        guard let model = try? VNCoreMLModel(for: yolo11m().model) else {
+        guard let model = try? VNCoreMLModel(for: yolo11n().model) else {
             print("Failed to load YOLO11 model")
             return
         }
         
         // Initializes Vision framework request
         let request = VNCoreMLRequest(model: model, completionHandler: handleDetections)
+        
         request.imageCropAndScaleOption = .scaleFill
+        
         self.requests = [request]
     }
     
@@ -147,7 +148,9 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
 
         // Preps image for analysis
-        let requestHandler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, options: [:])
+        // orientation: parameter rotates image 90 degrees and mirrors the screen
+        // So that objects are tracked properly across the screen
+        let requestHandler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: .right, options: [:])
         do {
             // Runs YOLO detection inference on current frame
             try requestHandler.perform(self.requests)
@@ -295,6 +298,7 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
         do {
             
             try requestHandler.perform(trackingRequests, on: pixelbuffer)
+            // , orientation: .right
             
         } catch {
             print("Tracking error: \(error)")
