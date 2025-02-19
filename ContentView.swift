@@ -6,10 +6,12 @@ struct ContentView: View {
     // Initializes voice recognition class
     @StateObject private var voiceRecognition = VoiceRecognition()
     
-    @State private var showBoundingBoxes = true // Shows/Hides bounding boxes
+    @State private var showBoundingBoxes: Bool = true // Shows/Hides bounding boxes
     
     // Toggles between front & back camera
     @State private var isBackCamera: Bool = true
+    
+    @State private var showInfo: Bool = false
     
     // Button Background colors
     private var redBox = Color.red.opacity(0.7)
@@ -25,6 +27,22 @@ struct ContentView: View {
                 .edgesIgnoringSafeArea(.all) // Borderless view
 
             VStack {
+                
+                HStack {
+                    Spacer() // Pushes info button to top-right corner
+                    
+                    Button(action: {
+                        showInfo.toggle()
+                    }) {
+                        // Generic info icon
+                        Image(systemName: "questionmark.circle")
+                            .resizable()
+                            .frame(width: 30, height: 30)
+                            .foregroundColor(.white.opacity(0.5))
+                            .padding()
+                    }
+                }
+                
                 Spacer() // Pushes buttons to bottom of screen
                 
                 HStack {
@@ -66,6 +84,13 @@ struct ContentView: View {
                 .padding(.bottom, 20)
             }
         }
+        // Displays general info about the app
+        .alert("Speech-to-Image-Classifier", isPresented: $showInfo, actions: {
+            Button("OK", role: .cancel) {}
+        }, message: {
+            Text("This app allows you to detect & track objects in real-time using voice commands. Tap 'Record' to start speaking, and the app will highlight detected objects of your choosing.")
+        })
+        
     }
 }
 

@@ -124,7 +124,7 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
     // Initializes YOLO model
     func setVision() {
         
-        // Loads medium sized YOLO11 model in CoreML format
+        // Loads YOLO11 model in CoreML format
         guard let model = try? VNCoreMLModel(for: yolo11n().model) else {
             print("Failed to load YOLO11 model")
             return
@@ -148,8 +148,8 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
 
         // Preps image for analysis
-        // orientation: parameter rotates image 90 degrees and mirrors the screen
-        // So that objects are tracked properly across the screen
+        // orientation: .right parameter rotates image 90 degrees
+        // So that objects are detected in portrait orientation
         let requestHandler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: .right, options: [:])
         do {
             // Runs YOLO detection inference on current frame
@@ -298,7 +298,6 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
         do {
             
             try requestHandler.perform(trackingRequests, on: pixelbuffer)
-            // , orientation: .right
             
         } catch {
             print("Tracking error: \(error)")
