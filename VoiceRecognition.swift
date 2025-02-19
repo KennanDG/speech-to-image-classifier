@@ -2,6 +2,7 @@
 import Foundation
 import Speech
 import AVFoundation
+import UIKit
 
 
 class VoiceRecognition: ObservableObject {
@@ -45,6 +46,10 @@ class VoiceRecognition: ObservableObject {
         else {
             startRecording()
         }
+        
+        let hapticFeedback = UIImpactFeedbackGenerator(style: .heavy)
+        hapticFeedback.prepare()
+        hapticFeedback.impactOccurred()
     }
     
     
@@ -96,6 +101,7 @@ class VoiceRecognition: ObservableObject {
         recognitionTask?.cancel()
         recognitionTask = nil
         recognizedText = nil
+        
         
         // Sends notification to CameraViewController
         NotificationCenter.default.post(name: Notification.Name("RecognizedSpeech"), object: self.recognizedText)

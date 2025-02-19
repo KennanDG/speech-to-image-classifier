@@ -206,6 +206,7 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
         
         // Debugging print statement
         print("Detected: \(result.labels.first?.identifier ?? "Unkown Object") with confidence \(result.confidence)")
+    
         
         // Gets detected object label
         let foundLabel = result.labels.first?.identifier.lowercased() ?? "Unknown Object"
@@ -240,6 +241,7 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
             
             // Displays bounding box on screen
             drawBoundingBox(frame: objectBounds, label: foundLabel)
+            
         }
         
     }
