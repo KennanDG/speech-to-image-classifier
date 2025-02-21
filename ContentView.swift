@@ -55,7 +55,7 @@ struct ContentView: View {
                         Image(systemName: "arrow.trianglehead.2.clockwise.rotate.90.camera.fill")
                             .resizable()
                             .frame(width: 40, height: 40)
-                            .foregroundColor(.white.opacity(0.5))
+                            .foregroundColor(.white.opacity(0.7))
                             .padding()
                     }
                     
@@ -89,7 +89,7 @@ struct ContentView: View {
         .alert("Speech-to-Image-Classifier", isPresented: $showInfo, actions: {
             Button("OK", role: .cancel) {}
         }, message: {
-            Text("This app allows you to detect & track objects in real-time using voice commands. Tap 'Record' to start speaking, and the app will highlight detected objects of your choosing.")
+            Text("This app allows you to detect & track objects in real-time using voice commands. Tap 'Record' to start speaking, and the app will highlight detected objects of your choosing. Tap 'Hide/Show' to toggle bounding box visibility. And click the camera icon to flip between the front & back cameras.")
         })
         
     }
