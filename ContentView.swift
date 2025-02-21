@@ -51,11 +51,12 @@ struct ContentView: View {
                         isBackCamera.toggle()
                         NotificationCenter.default.post(name: Notification.Name("switchCamera"), object: isBackCamera)
                     }) {
-                        Text(isBackCamera ? "Back" : "Front")
+                        // Icon to flip camera front/back
+                        Image(systemName: "arrow.trianglehead.2.clockwise.rotate.90.camera.fill")
+                            .resizable()
+                            .frame(width: 40, height: 40)
+                            .foregroundColor(.white.opacity(0.5))
                             .padding()
-                            .background(isBackCamera ? blackBox : whiteBox)
-                            .foregroundColor(isBackCamera ? .white : .black)
-                            .cornerRadius(10)
                     }
                     
                     // Starts/Stops voice recording
