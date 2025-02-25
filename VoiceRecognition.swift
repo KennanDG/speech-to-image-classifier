@@ -114,15 +114,6 @@ class VoiceRecognition: ObservableObject {
         requestSpeechAuthorization()
     }
     
-    func getDetectedObjects() -> [String] {
-        
-        guard let objects = detectedObjects
-        else {
-            return []
-        }
-        
-        return objects
-    }
     
     // Checks for user permission for speech recognition
     func requestSpeechAuthorization() {
@@ -176,16 +167,13 @@ class VoiceRecognition: ObservableObject {
                 
                 self.detectedObjects = []
                 
-                // Debugging print statement
-                print("Audio transcription: \(result.bestTranscription.formattedString)")
-                
                 self.recognizedWords = result.bestTranscription.formattedString.lowercased()
                 
                 if self.recognizedWords != nil {
                     // Stores each word separately in a list
                     let words = self.recognizedWords!.split(separator: " ").map { $0.lowercased()}
                     
-                    
+                    // Checks for any words that are object labels
                     for word in words {
                         if self.cocoDataset.keys.contains(word) {
                             self.detectedObjects?.append(word)
@@ -193,8 +181,6 @@ class VoiceRecognition: ObservableObject {
                     }
                 }
                 
-                // Debugging print statement
-                print("VoiceRecognition detected objects: \(self.detectedObjects ?? [])\n")
                 
                 // Sends notification to CameraViewController
                 NotificationCenter.default.post(name: Notification.Name("RecognizedSpeech"), object: self.detectedObjects)

@@ -35,6 +35,7 @@ struct ContentView: View {
                 HStack {
                     Spacer() // Pushes info button to top-right corner
                     
+                    // Additional info button
                     Button(action: {
                         showInfo.toggle()
                     }) {
@@ -51,6 +52,7 @@ struct ContentView: View {
                 
                 HStack {
                     
+                    // Flip camera button
                     Button(action: {
                         isBackCamera.toggle()
                         NotificationCenter.default.post(name: Notification.Name("switchCamera"), object: isBackCamera)
@@ -103,17 +105,6 @@ struct ContentView: View {
                         NotificationCenter.default.post(name: Notification.Name("BoxesToHide"), object: newSelection)
                     }
 
-//                    // Show/Hide bounding boxes
-//                    Button(action: {
-//                        showBoundingBoxes.toggle()
-//                        NotificationCenter.default.post(name: Notification.Name("BoxesToHide"), object: voiceRecognition.detectedObjects)
-//                    }) {
-//                        Text(showBoundingBoxes ? "Hide" : "Show")
-//                            .padding()
-//                            .background(showBoundingBoxes ? blackBox : whiteBox)
-//                            .foregroundColor(showBoundingBoxes ? .white : .black)
-//                            .cornerRadius(10)
-//                    }
                 }
                 .padding(.bottom, 20)
             }
@@ -127,7 +118,7 @@ struct ContentView: View {
         
     }
     
-    // Adds/Rmoves object to hidden bounding box list
+    // Adds/Removes object to hidden bounding box list
     private func toggleObjectSelection(_ object: String) {
         if selectedObjectsToHide.contains(object) {
             selectedObjectsToHide.removeAll { $0 == object }
@@ -137,6 +128,8 @@ struct ContentView: View {
     }
     
 }
+
+
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {

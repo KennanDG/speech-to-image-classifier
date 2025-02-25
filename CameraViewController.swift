@@ -51,7 +51,7 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
         // If the audio transcription is not nil
         if let transcribedAudio = notification.object as? [String] {
             
-            // Stores each word separately in a list
+            
             detectedObjects = transcribedAudio
             print("User wants to see: \(detectedObjects)")
             
@@ -202,10 +202,6 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
     
     func displayObjects(result: VNRecognizedObjectObservation) {
         
-        // Debugging print statement
-        // print("Detected: \(result.labels.first?.identifier ?? "Unkown Object") with confidence \(result.confidence)")
-    
-        
         // Gets detected object label
         let foundLabel = result.labels.first?.identifier.lowercased() ?? "Unknown Object"
 
@@ -281,6 +277,7 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
         textLayer.string = label
         textLayer.foregroundColor = UIColor.white.cgColor
         textLayer.fontSize = 14
+        
         // Sits on top of bounding box
         textLayer.frame = CGRect(x: frame.origin.x, y: frame.origin.y - 15, width: frame.width, height: 15)
         textLayer.alignmentMode = .center
