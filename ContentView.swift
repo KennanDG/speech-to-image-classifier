@@ -6,8 +6,6 @@ struct ContentView: View {
     // Initializes voice recognition class as an observable object
     @StateObject private var voiceRecognition = VoiceRecognition()
     
-    @State private var showBoundingBoxes: Bool = true // Shows/Hides bounding boxes
-    
     // Toggles between front & back camera
     @State private var isBackCamera: Bool = true
     
