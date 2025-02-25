@@ -79,7 +79,14 @@ struct ContentView: View {
                     
                     // Displays object labels based on user verbal command
                     Menu {
-                        ForEach(voiceRecognition.detectedObjects ?? ["None"], id: \.self) { object in
+                        
+                        // Stores detected objects list as a set to remove any duplicate values
+                        let orderedSet = NSOrderedSet(array: voiceRecognition.detectedObjects ?? ["None"])
+                        
+                        // Converts it back to a list
+                        let objects = orderedSet.array as! [String]
+                        
+                        ForEach(objects, id: \.self) { object in
                             Button(action: {
                                 toggleObjectSelection(object)
                             }) {
