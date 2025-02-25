@@ -14,14 +14,17 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
     
     private var requests = [VNRequest]() // List of Vision requests from YOLO model
     
-    // List of objects from audio transcription
-    private var recognizedObjects: [String] = []
+    // Audio transcription stored as a list
+    private var detectedObjects: [String] = []
     
     private let maxTrackingRequests = 5
     private var trackingRequests = [VNTrackObjectRequest]()
     
     // Tracks camera position
     private var cameraPosition: AVCaptureDevice.Position = .back
+    
+    // Objects where user can hide bounding boxes if they want to
+    private var hiddenObjectLabels: [String] = []
     
 
     
@@ -46,17 +49,18 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
     @objc func updateRecognizedObjects(_ notification: Notification) {
         
         // If the audio transcription is not nil
-        if let transcribedAudio = notification.object as? String {
+        if let transcribedAudio = notification.object as? [String] {
             
             // Stores each word separately in a list
-            recognizedObjects = transcribedAudio.split(separator: " ").map { $0.lowercased()}
-            print("User wants to see: \(recognizedObjects)")
+            detectedObjects = transcribedAudio
+            print("User wants to see: \(detectedObjects)")
+            
         }
         else {
-            
             // Removes all tracking requests when voice recording stops
-            recognizedObjects = []
+            detectedObjects = []
             trackingRequests.removeAll()
+            hiddenObjectLabels.removeAll()
         }
     }
     
@@ -184,16 +188,10 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
                     return
                 }
             
-            // Debugging print statement
-            if results.isEmpty {
-                print("YOLO model is running but no objects detected")
-            }
-            else {
-                print("Objects detected: \(results.count)")
-            }
             
             // iterates thru each detected object in view
             for result in results {
+                
                 
                 self.displayObjects(result: result)
                 
@@ -205,14 +203,15 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
     func displayObjects(result: VNRecognizedObjectObservation) {
         
         // Debugging print statement
-        print("Detected: \(result.labels.first?.identifier ?? "Unkown Object") with confidence \(result.confidence)")
+        // print("Detected: \(result.labels.first?.identifier ?? "Unkown Object") with confidence \(result.confidence)")
     
         
         // Gets detected object label
         let foundLabel = result.labels.first?.identifier.lowercased() ?? "Unknown Object"
+
         
-        // Checks if label is in audio transcription
-        if self.recognizedObjects.contains(foundLabel) {
+        // Checks if label is in audio transcription & not in hidden list
+        if self.detectedObjects.contains(foundLabel) && !self.hiddenObjectLabels.contains(foundLabel){
             
             // Gets device screen dimensions
             let screen: CGRect = UIScreen.main.bounds
@@ -311,16 +310,16 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        NotificationCenter.default.addObserver(self, selector: #selector(toggleBoundingBoxes(_:)), name: Notification.Name("ToggleBoundingBoxes"), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(hideBoundingBoxes(_:)), name: Notification.Name("BoxesToHide"), object: nil)
         
     }
     
     
 
     // Shows/Hides the bounding boxes on screen
-    @objc func toggleBoundingBoxes(_ notification: Notification) {
-        if let isVisible = notification.object as? Bool {
-            objectDetectionLayer.isHidden = !isVisible
+    @objc func hideBoundingBoxes(_ notification: Notification) {
+        if let hideLabels = notification.object as? [String] {
+            hiddenObjectLabels = hideLabels
         }
     }
 
